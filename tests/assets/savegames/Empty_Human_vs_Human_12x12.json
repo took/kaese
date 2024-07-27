@@ -1,0 +1,10 @@
+{
+    "size_x": 12,
+    "size_y": 12,
+    "player_ai": {
+        "1": "Human",
+        "2": "Human"
+    },
+    "move_history_pointer": 0,
+    "move_history": []
+}

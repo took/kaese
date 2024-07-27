@@ -1,0 +1,9 @@
+.idea
+.pytest_cache
+__pycache__/
+venv
+/.coverage
+/savegames/*.pkl
+/savegames/*.json
+*.log
+*-old.py
