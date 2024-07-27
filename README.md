@@ -15,7 +15,7 @@ Alternatively, you can also let two AIs play against each other.
 
 Just clone form git:
 
-`git clone git@gitlab.datenfalke.de:blinkenplus/kaese.git`
+`git clone git@github.com:took/kaese.git`
 
 ### Requirements
 
