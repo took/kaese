@@ -56,8 +56,12 @@ class TkinterGui(AbstractGui):  # TODO Vielleicht sollte man die AbstractGui gar
             player1: str = "Human",
             player2: str = "Human",
             tree_ai_max_moves: int = 8,
+            ip: str = None,
+            port: int = 2345,
             verbose: Union[bool, int] = False
     ) -> None:
+        self.running = True  # TODO Refactor network
+
         # Get Parameters
         self.theme = theme
         self.ai_interval = ai_interval
@@ -191,6 +195,13 @@ class TkinterGui(AbstractGui):  # TODO Vielleicht sollte man die AbstractGui gar
         msg = ("Tkinter-GUI initialized, Next Up: Player %d (%s)"
                % (self.gb.current_player, self.gb.player_ai[self.gb.current_player]))
         logging.debug(msg)
+
+    def popup_info(self, msg: str, title: str = "", color_set: str = "default") -> None:
+        """
+        Pop up an Info Box.
+        """
+        # TODO Refactor network - Pop up a window!
+        pass
 
     def make_move(self, move: Move) -> None:
         """Make move on gb and redraw gameboard"""

@@ -72,9 +72,9 @@ Correspondingly, the `Move` object includes the x and y coordinates, an indicati
 ## Planned Features
 
   * Make the delay for AI players adjustable in game using the GUI.
-  * Add more tests.
-  * Implement network play functionality.
-  * Allow customizable starting positions.
+  * Add more tests. Docker Container for Server & Client Tests?
+  * Improve network play functionality. Add Lobby & Chat.
+  * Allow customizable starting positions (Load from Savegame).
   * Add `make clean` and `make release` to Makefile.
 
 

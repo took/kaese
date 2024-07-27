@@ -226,7 +226,7 @@ class TreeAI(AI):
         :return:
         """
 
-        if self.verbose is int and self.verbose > 2:
+        if self.verbose > 2:
             msg = "Take back %d moves." % count
             logging.debug(msg)
             print(msg)

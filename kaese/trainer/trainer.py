@@ -669,7 +669,7 @@ class Gui(AbstractGui):
                 if self.ai_thread:
                     if not self.running_tree_ai.killed:
                         if self.ai_thread.is_alive():
-                            if self.verbose is int and self.verbose > 1:  # At least "very verbose"
+                            if self.verbose > 1:  # At least "very verbose"
                                 logging.debug(
                                     "--TreeAI thread Player %d--  Waiting for TreeAI thread since %d seconds..."
                                     % (current_player, int((current_time - self.ai_thread_start_time) / 1000))

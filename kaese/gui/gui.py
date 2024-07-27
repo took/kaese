@@ -24,6 +24,7 @@ from kaese.gui.popup_windows_queue import PopupWindowsQueue
 from kaese.gui.radio_button_list import RadioButtonList
 from kaese.gui.text_box import TextBox
 from kaese.gui.themes.theme import Theme
+from kaese.network.client.client import Client
 from kaese.savegames.savegames import Savegames
 
 
@@ -49,6 +50,8 @@ class Gui(AbstractGui):
     running_tree_ai: Optional[kaese.ai.tree_ai.TreeAI]
     tree_ai_move: Optional[Move]
     tree_ai_max_moves: int
+
+    client: Optional[Client]
 
     screen_width: int
     screen_height: int
@@ -90,6 +93,8 @@ class Gui(AbstractGui):
             player1: str = "Human",
             player2: str = "Human",
             tree_ai_max_moves: int = 8,
+            ip: str = None,
+            port: int = 2345,
             verbose: Union[bool, int] = False
     ) -> None:
         # Get Parameters
@@ -98,6 +103,8 @@ class Gui(AbstractGui):
         self.player1 = player1
         self.player2 = player2
         self.tree_ai_max_moves = tree_ai_max_moves
+        self.ip = ip
+        self.port = port
         self.verbose = verbose
 
         # Init Gameboard
@@ -141,16 +148,53 @@ class Gui(AbstractGui):
                % (self.gb.current_player, self.gb.player_ai[self.gb.current_player]))
         logging.debug(msg)
 
+        if self.ip:
+            logging.info("GUI connecting to %s:%d" % (self.ip, self.port))
+            self.client = Client(self, self.ip, self.port)
+        else:
+            self.client = None
+
+    def popup_info(self, msg: str, title: str = "", color_set: str = "default") -> None:
+        """
+        Pop up an Info Box.
+        """
+        # Write welcome message using logging, STDOUT and PopUp window
+        msg = msg.strip()
+        title = title.strip()
+        if title:
+            msg = title + "\n" + msg
+        self.popup_windows_queue.push(
+            PopupWindow(
+                self.theme,
+                self.screen,
+                msg,
+                font_size_message=14,
+                callback_function=self.callback_popup_window_dismiss_button
+            )
+        )
+
     def main_loop(self) -> None:
         """The main loop"""
 
         self.running = True
         while self.running:
+            redraw = False
+            if self.handle_network():
+                redraw = True
             if self.handle_events():
+                redraw = True
+
+            if redraw:
                 self.draw_all()
             self.pygame_clock.tick(60)
 
         pygame.quit()
+
+    def handle_network(self):
+        """Handle Network Queue if applicable"""
+        if self.client is not None:
+            return self.client.gui_hook_handle_network()
+        return False
 
     def handle_events(self) -> bool:
         """
@@ -552,6 +596,9 @@ class Gui(AbstractGui):
 
     def make_move(self, move: Move) -> None:
         """Make move on gb and redraw gameboard"""
+        if self.ip:
+            self.client.gui_hook_queue_move_for_sending(move)
+            return
         if self.gb.move_history_pointer != len(self.gb.move_history):
             # Deny move
             return
@@ -621,6 +668,10 @@ class Gui(AbstractGui):
     def check_ai(self) -> None:
         """Run AI if current player is AI"""
 
+        # Skip if network is used
+        if self.ip:
+            return
+
         # Skip if game has already ended
         if self.gb.winner > 0:
             return
@@ -669,7 +720,7 @@ class Gui(AbstractGui):
                 if self.ai_thread:
                     if not self.running_tree_ai.killed:
                         if self.ai_thread.is_alive():
-                            if self.verbose is int and self.verbose > 1:  # At least "very verbose"
+                            if self.verbose > 1:  # At least "very verbose"
                                 logging.debug(
                                     "--TreeAI thread Player %d--  Waiting for TreeAI thread since %d seconds..."
                                     % (current_player, int((current_time - self.ai_thread_start_time) / 1000))
@@ -694,9 +745,10 @@ class Gui(AbstractGui):
                     self.ai_thread = threading.Thread(target=self.run_tree_ai)
                     self.ai_thread_start_time = current_time
                     self.ai_thread.start()
-            elif player_ai != "Human":
-                msg = "Error: AI '%s' is not yet supported!" % player_ai
-                raise GuiException(msg)
+            # elif player_ai != "Human":
+                # msg = "Error: AI '%s' is not yet supported!" % player_ai
+                # raise GuiException(msg)
+
 
         # Catch any Exceptions raised by the AIs
         except Exception as err:

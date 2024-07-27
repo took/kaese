@@ -13,9 +13,17 @@ class AbstractGui(ABC):
     Also used for TkinterGui as a boilerplate.
     """
     gb: GameBoard
+    running: bool
     screen_width: int
     screen_height: int
     verbose: Union[bool, int]
+
+    @abstractmethod
+    def popup_info(self, msg: str, title: str = "", color_set: str = "default") -> None:
+        """
+        Pop up an Info Box.
+        """
+        pass
 
     @abstractmethod
     def make_move(self, move: Move) -> None:

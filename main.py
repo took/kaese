@@ -1,6 +1,7 @@
 import logging
 import argparse
 import os
+import sys
 
 from kaese.gui.gui import Gui
 from kaese.gui.themes.themes_manager import ThemesManager
@@ -54,6 +55,10 @@ def main():
                         help="Filename of save-game in the ./savegames/ folder to load from (Default: None)")
     parser.add_argument("-s", "--save", type=str, default="latest.json",
                         help="Filename to save to on exit (Default: latest.json)")
+    parser.add_argument("-i", "--ip", type=str, default=None,
+                        help="IP to connect to (Default: None)")
+    parser.add_argument("-p", "--port", type=int, default=2345,
+                        help="Port to connect to (Default: 2345)")
     parser.add_argument("--ai-interval", type=int, default=1500,
                         help="Delay in milliseconds for AIs before they take their next turn (Default: 1500)")
     parser.add_argument("-p1", "--player1", type=type_player_ai, default=None,
@@ -79,6 +84,10 @@ def main():
     if args.file and (args.size_x or args.size_y):
         raise argparse.ArgumentError(None, "Arguments --size-x and --size-y are not allowed "
                                            "together with --file.")
+
+    if args.ip and (args.file or args.tkinter):
+        raise argparse.ArgumentError(None, "Arguments --file and --tkinter are not allowed "
+                                           "together with --ip.")
 
     # Set defaults for arguments size_x and size_y
     if not args.size_x:
@@ -132,6 +141,8 @@ def main():
                 player1=args.player1 if args.player1 is not None else "Human",
                 player2=args.player2 if args.player2 is not None else "Human",
                 tree_ai_max_moves=args.moves,
+                # ip=args.ip,  # TODO Add network features to TKInter GUI
+                # port=args.port,
                 verbose=verbose
             )
         else:
@@ -144,11 +155,13 @@ def main():
                 player1=args.player1 if args.player1 is not None else "Human",
                 player2=args.player2 if args.player2 is not None else "Human",
                 tree_ai_max_moves=args.moves,
+                ip=args.ip,
+                port=args.port,
                 verbose=verbose
             )
 
         # Load save-game if requested
-        if args.file:
+        if args.file and args.ip is None:
             filename = args.file
             gui.gb = Savegames.load_game(filename, reset_players_to_human=False, verbose=gui.verbose)
             if args.player1 is not None:
@@ -186,6 +199,7 @@ def main():
     # Application termination and cleanup
     logging.info("Application terminated.")
     print("Application terminated. Goodbye!")
+    sys.exit()
 
 
 if __name__ == "__main__":
